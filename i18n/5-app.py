@@ -6,19 +6,10 @@ from flask import Flask, request, render_template, g
 import os
 from flask_babel import Babel
 
+
 app = Flask(__name__)
-babel = Babel(app)
 
-
-class Config(object):
-    """For configure Babel"""
-    LANGUAGES = ['en', 'fr']
-    BABEL_DEFAULT_LOCALE = 'en'
-    BABEL_DEFAULT_TIMEZONE = 'UTC'
-
-
-app.config.from_object(Config)
-
+# Mock database
 users = {
     1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
     2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
@@ -26,41 +17,31 @@ users = {
     4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
 }
 
-
-def get_locale():
-    """get locale function"""
-    locale = request.args.get('locale')
-    if locale in app.config['LANGUAGES']:
-        return locale
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
-
-
+# Get user function
 def get_user():
-    """Returns a user dictionary or None"""
-    user_id = request.args.get('login_as')
-    if user_id is not None:
-        user_id = int(user_id)
-        return users.get(user_id)
+    """Retrieve a user dictionary based on the login_as parameter."""
+    try:
+        user_id = request.args.get("login_as")
+        if user_id:
+            user_id = int(user_id)
+            return users.get(user_id)
+    except Exception:
+        return None
     return None
 
-
+# Before each request
 @app.before_request
 def before_request():
-    """Before request function to get user"""
+    """Set g.user to the logged-in user, if any."""
     g.user = get_user()
 
-
-babel = Babel(app, locale_selector=get_locale)
-
-
-@app.route('/', methods=['GET'])
+# Route
+@app.route('/')
 def index():
-    """ Get simple route and return html
-    """
-    return render_template('5-index.html')
-
+    if g.user:
+        return render_template("5-index.html", username=g.user["name"])
+    else:
+        return render_template("5-index.html", username=None)
 
 if __name__ == "__main__":
-    host = os.getenv("API_HOST", "0.0.0.0")
-    port = os.getenv("API_PORT", "5000")
-    app.run(host=host, port=port)
+    app.run()

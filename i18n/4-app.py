@@ -3,42 +3,25 @@
 
 
 from flask import Flask, request, render_template
-import os
-from flask_babel import Babel
+from flask_babel import Babel, _
 
 app = Flask(__name__)
+
+# Configurer Babel
+app.config['BABEL_DEFAULT_LOCALE'] = 'en'
+app.config['BABEL_SUPPORTED_LOCALES'] = ['en', 'fr']
+
 babel = Babel(app)
 
-
-class Config(object):
-    """For configure Babel"""
-    LANGUAGES = ['en', 'fr']
-    BABEL_DEFAULT_LOCALE = 'en'
-    BABEL_DEFAULT_TIMEZONE = 'UTC'
-
-
-app.config.from_object(Config)
-
-
+@babel.localeselector
 def get_locale():
-    """get locale function"""
+    # Vérifier si "locale" est passé en paramètre d'URL
     locale = request.args.get('locale')
-    if locale in app.config['LANGUAGES']:
+    if locale in app.config['BABEL_SUPPORTED_LOCALES']:
         return locale
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
+    # Sinon, on garde le comportement par défaut
+    return request.accept_languages.best_match(app.config['BABEL_SUPPORTED_LOCALES'])
 
-
-babel = Babel(app, locale_selector=get_locale)
-
-
-@app.route('/', methods=['GET'])
+@app.route('/')
 def index():
-    """ Get simple route and return html
-    """
-    return render_template('4-index.html')
-
-
-if __name__ == "__main__":
-    host = os.getenv("API_HOST", "0.0.0.0")
-    port = os.getenv("API_PORT", "5000")
-    app.run(host=host, port=port)
+    return render_template("index.html")

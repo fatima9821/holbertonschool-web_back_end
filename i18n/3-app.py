@@ -2,40 +2,26 @@
 """ create simple route """
 
 
-from flask import Flask, request, render_template
-import os
-from flask_babel import Babel
+from flask import Flask, render_template, request
+from flask_babel import Babel, _
 
 app = Flask(__name__)
+
+# Config Babel
+app.config['BABEL_DEFAULT_LOCALE'] = 'en'
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
+
 babel = Babel(app)
 
-
-class Config(object):
-    """For configure Babel"""
-    LANGUAGES = ['en', 'fr']
-    BABEL_DEFAULT_LOCALE = 'en'
-    BABEL_DEFAULT_TIMEZONE = 'UTC'
-
-
-app.config.from_object(Config)
-
-
+# Sélecteur de langue simple via ?lang=fr|en
+@babel.localeselector
 def get_locale():
-    """get locale function"""
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
+    return request.args.get('lang') or 'en'
 
-
-babel = Babel(app, locale_selector=get_locale)
-
-
-@app.route('/', methods=['GET'])
-def index():
-    """ Get simple route and return html
-    """
-    return render_template('3-index.html')
-
-
-if __name__ == "__main__":
-    host = os.getenv("API_HOST", "0.0.0.0")
-    port = os.getenv("API_PORT", "5000")
-    app.run(host=host, port=port)
+@app.route('/')
+def home():
+    # Les chaînes dans le template seront marquées avec _
+    return render_template('home.html')
+    
+if __name__ == '__main__':
+    app.run(debug=True)

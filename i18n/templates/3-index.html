@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html dir="ltr" lang="en">
-<head>
-    <!-- head -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!doctype html>
+<html lang="{{ get_locale() if get_locale else 'en' }}">
+  <head>
+    <meta charset="utf-8">
     <title>{{ _('home_title') }}</title>
-</head>
-<body>
-    <!--Header-->
-    <header>
-        <h1>{{ _('home_header') }}</h1>
-    </header>
-</body>
+  </head>
+  <body>
+    <h1>{{ _('home_header') }}</h1>
+    <p>Try: <a href="/?lang=en">EN</a> | <a href="/?lang=fr">FR</a></p>
+  </body>
 </html>
