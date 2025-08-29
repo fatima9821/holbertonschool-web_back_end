@@ -92,4 +92,3 @@ class Cache():
         """ Retrieve a string from redis """
         value = self._redis.get(key)
         return value.decode("utf-8")
-
